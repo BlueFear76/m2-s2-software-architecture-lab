@@ -21,6 +21,10 @@ export abstract class TagRepository {
     id: string,
   ): TagEntity | undefined | Promise<TagEntity | undefined>;
 
+  public abstract getTagByName(
+    name: string,
+  ): TagEntity | undefined | Promise<TagEntity | undefined>;
+
   public abstract createTag(input: TagEntity): void | Promise<void>;
 
   public abstract updateTag(
