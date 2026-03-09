@@ -1,5 +1,3 @@
-export class UpdatePostDto {
-  title?: string;
-
-  content?: string;
+export class UpdateTagDto {
+  name : string;
 }

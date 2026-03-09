@@ -1,3 +1,3 @@
-export class CreatePostDto {
+export class CreateTagDto {
   name: string;
 }
