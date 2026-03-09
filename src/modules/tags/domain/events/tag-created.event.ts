@@ -1,5 +1,5 @@
 export const TagCreatedEvent = 'tag.created';
 
-export type PostCreatedEventPayload = {
+export type TagCreatedEventPayload = {
   tagId: string;
 };
