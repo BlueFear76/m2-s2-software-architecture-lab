@@ -8,7 +8,7 @@ export function makeUserWithPermission(): UserEntity {
         canCreate: () => true,
       },
       tags: {
-        canCreate: () => true,
+        isAdmin: () => true,
       },
     },
   } as unknown as UserEntity;
@@ -20,10 +20,9 @@ export function makeUserWithoutPermission(): UserEntity {
     permissions: {
       posts: {
         canCreate: () => false,
-
       },
       tags: {
-        canCreate: () => false,  // ← AJOUT OBLIGATOIRE
+        isAdmin: () => false,
       },
     },
   } as unknown as UserEntity;

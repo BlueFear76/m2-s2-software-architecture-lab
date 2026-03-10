@@ -6,15 +6,7 @@ export class TagPermissions {
     private readonly role: UserRole,
   ) {}
 
-  public canCreate(): boolean {
-    return this.role === 'admin';
-  }
-
-  public canUpdateName(): boolean {
-    return this.role === 'admin';
-  }
-
-  public canDeleteTag(): boolean {
+  public isAdmin(): boolean {
     return this.role === 'admin';
   }
 }

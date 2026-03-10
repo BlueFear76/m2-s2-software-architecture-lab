@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { LoggingService } from '../../../shared/logging/domain/services/logging.service';
 import { TagRepository } from '../../domain/repositories/tag.repository';
+import { UserEntity } from 'src/modules/users/domain/entities/user.entity';
+import { UserCannotDeleteTagException } from '../../domain/exceptions/user-cannot-dalete-tag.exception';
 
 @Injectable()
 export class DeleteTagUseCase {
@@ -9,8 +11,12 @@ export class DeleteTagUseCase {
     private readonly loggingService: LoggingService,
   ) {}
 
-  public async execute(id: string): Promise<void> {
+  public async execute(id: string, user: UserEntity): Promise<void> {
     this.loggingService.log('DeleteTagUseCase.execute');
+
+    if (!user.permissions.tags.isAdmin()) { 
+      throw new UserCannotDeleteTagException();
+    }
     await this.tagRepository.deleteTag(id);
   }
 }
