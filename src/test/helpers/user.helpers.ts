@@ -7,6 +7,9 @@ export function makeUserWithPermission(): UserEntity {
       posts: {
         canCreate: () => true,
       },
+      tags: {
+        canCreate: () => true,
+      },
     },
   } as unknown as UserEntity;
 }
@@ -17,6 +20,10 @@ export function makeUserWithoutPermission(): UserEntity {
     permissions: {
       posts: {
         canCreate: () => false,
+
+      },
+      tags: {
+        canCreate: () => false,  // ← AJOUT OBLIGATOIRE
       },
     },
   } as unknown as UserEntity;

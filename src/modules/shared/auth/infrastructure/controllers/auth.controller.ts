@@ -1,8 +1,10 @@
 import { Body, Controller, Post } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { LoggingService } from '../../../../shared/logging/domain/services/logging.service';
 import { LoginDto } from '../../application/dtos/login.dto';
 import { LoginUseCase } from '../../application/use-cases/login.use-case';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -10,6 +12,20 @@ export class AuthController {
     private readonly loggingService: LoggingService,
   ) {}
 
+  @ApiOperation({ summary: 'Authenticate a user and return a JWT token' })
+  @ApiResponse({
+    status: 200,
+    description: 'User successfully authenticated',
+    schema: {
+      example: {
+        access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid credentials',
+  })
   @Post('login')
   public async login(
     @Body() input: LoginDto,

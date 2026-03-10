@@ -20,7 +20,15 @@ import { GetTagByNameUseCase } from '../../application/use-cases/get-tag-by-name
 import { GetTagByIdUseCase } from '../../application/use-cases/get-tag-by-id.use-case';
 import { GetTagsUseCase } from '../../application/use-cases/get-tags.use-case';
 import { UpdateTagUseCase } from '../../application/use-cases/update-tag.use-case';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 
+@ApiTags('tags')
 @Controller('tags')
 export class TagController {
   constructor(
@@ -32,6 +40,9 @@ export class TagController {
     private readonly getTagByNameUseCase: GetTagByNameUseCase,
   ) { }
 
+  @ApiOperation({ summary: 'Get all tags or filter by name' })
+  @ApiQuery({ name: 'name', required: false, description: 'Filter tag by name' })
+  @ApiResponse({ status: 200, description: 'List of tags' })
   @Get()
   public async getTags(@Query('name') name?: string) {
     if (name) {
@@ -43,6 +54,9 @@ export class TagController {
     return tags.map((t) => t.toJSON());
   }
 
+  @ApiOperation({ summary: 'Get tag by id' })
+  @ApiResponse({ status: 200, description: 'Tag found' })
+  @ApiResponse({ status: 404, description: 'Tag not found' })
   @Get(':id')
   public async getTagById(
     @Param('id') id: string,
@@ -52,6 +66,9 @@ export class TagController {
     return tag?.toJSON();
   }
 
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Create a new tag' })
+  @ApiResponse({ status: 201, description: 'Tag created' })
   @UseGuards(JwtAuthGuard)
   @Post()
   public async createTag(
@@ -61,6 +78,9 @@ export class TagController {
     return this.createTagUseCase.execute(input, user);
   }
 
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Update a tag' })
+  @ApiResponse({ status: 200, description: 'Tag updated' })
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   public async updateTag(
@@ -70,6 +90,9 @@ export class TagController {
     return this.updateTagUseCase.execute(id, input);
   }
 
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Delete a tag' })
+  @ApiResponse({ status: 200, description: 'Tag deleted' })
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   public async deleteTag(@Param('id') id: string) {

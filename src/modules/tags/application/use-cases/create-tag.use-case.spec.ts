@@ -8,6 +8,7 @@ import { UserCannotCreateTagException } from '../../domain/exceptions/user-canno
 import { TagRepository } from '../../domain/repositories/tag.repository';
 import { CreateTagUseCase } from './create-tag.use-case';
 import { LoggingService } from '../../../shared/logging/domain/services/logging.service';
+import { TagAlreadyExistsException } from '../../domain/exceptions/tag-already-exists.exception';
 
 describe('CreateTagUseCase', () => {
   let useCase: CreateTagUseCase;
@@ -17,6 +18,7 @@ describe('CreateTagUseCase', () => {
 
   beforeEach(() => {
     tagRepository = {
+      getTagByName: jest.fn().mockResolvedValue(undefined),
       createTag: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<TagRepository>;
     eventEmitter = {
@@ -32,7 +34,7 @@ describe('CreateTagUseCase', () => {
     // Arrange
     const user = makeUserWithPermission();
     const createTagDto = {
-      name: 'My first Tag',
+      name: 'my-first-tag',
     };
 
     // Act
@@ -42,7 +44,7 @@ describe('CreateTagUseCase', () => {
     expect(tagRepository.createTag).toHaveBeenCalledTimes(1);
     expect(eventEmitter.emit).toHaveBeenCalledWith(
       TagCreatedEvent,
-      expect.objectContaining({ name: createTagDto.name }),
+      expect.objectContaining({ tagId: expect.any(String) }),
     );
   });
 
@@ -50,7 +52,7 @@ describe('CreateTagUseCase', () => {
     // Arrange
     const user = makeUserWithoutPermission();
     const createTagDto = {
-      name: 'My first Tag',
+      name: 'my-first-tag',
     };
 
     // Act
@@ -61,4 +63,14 @@ describe('CreateTagUseCase', () => {
     expect(tagRepository.createTag).not.toHaveBeenCalled();
     expect(eventEmitter.emit).not.toHaveBeenCalled();
   });
+
+  it('should throw TagAlreadyExistsException when tag exists', async () => {
+  const user = makeUserWithPermission();
+  const createTagDto = { name: 'my-first-tag' };
+
+  tagRepository.getTagByName.mockResolvedValue({} as any); // Tag existe
+
+  await expect(useCase.execute(createTagDto, user))
+    .rejects.toThrow(TagAlreadyExistsException);
+});
 });
