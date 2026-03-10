@@ -10,9 +10,11 @@ import { PostRepository } from './domain/repositories/post.repository';
 import { PostController } from './infrastructure/controllers/post.controller';
 // import { InMemoryPostRepository } from './infrastructure/repositories/post.in-memory.repository';
 import { SQLitePostRepository } from './infrastructure/repositories/post.sqlite.repository';
+import { AddTagToPostUseCase } from './application/use-cases/add-tag-to-post.use-case';
+import { TagModule } from '../tags/tag.module';
 
 @Module({
-  imports: [AuthModule, LoggingModule],
+  imports: [AuthModule, LoggingModule, TagModule],
   controllers: [PostController],
   providers: [
     {
@@ -25,6 +27,7 @@ import { SQLitePostRepository } from './infrastructure/repositories/post.sqlite.
     DeletePostUseCase,
     GetPostsUseCase,
     GetPostByIdUseCase,
+    AddTagToPostUseCase
   ],
 })
 export class PostModule {}

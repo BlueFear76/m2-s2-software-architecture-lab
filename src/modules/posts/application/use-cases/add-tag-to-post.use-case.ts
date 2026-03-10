@@ -2,6 +2,7 @@ import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/commo
 import { PostRepository } from '../../domain/repositories/post.repository';
 import { TagRepository } from '../../../tags/domain/repositories/tag.repository';
 import { UserEntity } from 'src/modules/users/domain/entities/user.entity';
+import { PostEntity } from '../../domain/entities/post.entity';
 
 @Injectable()
 export class AddTagToPostUseCase {
@@ -10,17 +11,15 @@ export class AddTagToPostUseCase {
     private readonly tagRepository: TagRepository,
   ) {}
 
-  async execute(postId: string, tagId: string, user: UserEntity): Promise<void> {
+  async execute(postId: string, tagId: string, user: UserEntity): Promise<PostEntity | undefined> {
 
     const post = await this.postRepository.getPostById(postId);
     if (!post) throw new NotFoundException('Post non trouvé');
 
-
-    if (post.authorId !== currentUserId && !isAdmin) {
+    if (!user.permissions.posts.canCreate()) {
       throw new ForbiddenException("Vous n'avez pas le droit de modifier ce post");
     }
-
-
+    
     const tag = await this.tagRepository.getTagById(tagId);
     if (!tag) throw new NotFoundException('Tag non trouvé');
 
@@ -28,6 +27,6 @@ export class AddTagToPostUseCase {
 
     await this.postRepository.updatePost(postId , post);
 
-    return post.toJSON();
+    return post
   }
 }

@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryColumn , CreateDateColumn } from 'typeorm';
+import { SQLitePostEntity } from 'src/modules/posts/infrastructure/entities/post.sqlite.entity';
+import { Column, Entity, PrimaryColumn , CreateDateColumn, ManyToMany } from 'typeorm';
 
 @Entity('tags')
 export class SQLiteTagEntity {
@@ -10,4 +11,7 @@ export class SQLiteTagEntity {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @ManyToMany(() => SQLitePostEntity, (post) => post.tags)
+  posts: SQLitePostEntity[];
 }

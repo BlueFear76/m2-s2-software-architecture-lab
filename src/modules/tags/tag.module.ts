@@ -28,5 +28,6 @@ import { SQLiteTagRepository } from './infrastructure/repositories/tag.sqlite.re
     GetTagByIdUseCase,
     GetTagByNameUseCase,
   ],
+  exports: [TagRepository],
 })
 export class TagModule {}

@@ -18,7 +18,11 @@ import { DeletePostUseCase } from '../../application/use-cases/delete-post.use-c
 import { GetPostByIdUseCase } from '../../application/use-cases/get-post-by-id.use-case';
 import { GetPostsUseCase } from '../../application/use-cases/get-posts.use-case';
 import { UpdatePostUseCase } from '../../application/use-cases/update-post.use-case';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AddTagToPostUseCase } from '../../application/use-cases/add-tag-to-post.use-case';
 
+
+@ApiTags('Posts')
 @Controller('posts')
 export class PostController {
   constructor(
@@ -27,8 +31,11 @@ export class PostController {
     private readonly deletePostUseCase: DeletePostUseCase,
     private readonly getPostsUseCase: GetPostsUseCase,
     private readonly getPostByIdUseCase: GetPostByIdUseCase,
+    private readonly addTagToPostUseCase: AddTagToPostUseCase,
   ) {}
 
+  @ApiOperation({ summary: 'Get all posts' })
+  @ApiResponse({ status: 200, description: 'Return all posts.' })
   @Get()
   public async getPosts() {
     const posts = await this.getPostsUseCase.execute();
@@ -36,6 +43,10 @@ export class PostController {
     return posts.map((p) => p.toJSON());
   }
 
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Get a post by ID' })
+  @ApiResponse({ status: 200, description: 'The post has been successfully retrieved.' })
+  @ApiResponse({ status: 404, description: 'Post not found.' })
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   public async getPostById(
@@ -47,11 +58,13 @@ export class PostController {
     return post?.toJSON();
   }
 
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Create a new post' })
   @Post()
   @UseGuards(JwtAuthGuard)
   public async createPost(
     @Requester() user: UserEntity,
-    @Body() input: Omit<CreatePostDto, 'authorId'>,
+    @Body() input: CreatePostDto,
   ) {
     return this.createPostUseCase.execute(
       { ...input, authorId: user.id },
@@ -59,6 +72,22 @@ export class PostController {
     );
   }
 
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Add a tag to a post' })
+  @ApiResponse({ status: 200, description: 'Tag added successfully' })
+  @UseGuards(JwtAuthGuard)
+  @Post(':postId/tags/:tagId') // URL : /posts/ID_DU_POST/tags/ID_DU_TAG
+  public async addTag(
+    @Requester() user: UserEntity,
+    @Param('postId') postId: string,
+    @Param('tagId') tagId: string,
+  ) {
+    const post = await this.addTagToPostUseCase.execute(postId, tagId, user);
+    return post!.toJSON();
+  }
+
+
+  @ApiOperation({ summary: 'Update a post' })
   @Patch(':id')
   public async updatePost(
     @Param('id') id: string,
@@ -67,6 +96,8 @@ export class PostController {
     return this.updatePostUseCase.execute(id, input);
   }
 
+
+  @ApiOperation({ summary: 'Delete a post' })
   @Delete(':id')
   public async deletePost(@Param('id') id: string) {
     return this.deletePostUseCase.execute(id);

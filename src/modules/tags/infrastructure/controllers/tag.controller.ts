@@ -84,10 +84,11 @@ export class TagController {
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   public async updateTag(
+    @Requester() user: UserEntity,
     @Param('id') id: string,
     @Body() input: UpdateTagDto,
   ) {
-    return this.updateTagUseCase.execute(id, input);
+    return this.updateTagUseCase.execute(id, input , user);
   }
 
   @ApiBearerAuth('access-token')
@@ -95,7 +96,7 @@ export class TagController {
   @ApiResponse({ status: 200, description: 'Tag deleted' })
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  public async deleteTag(@Param('id') id: string) {
-    return this.deleteTagUseCase.execute(id);
+  public async deleteTag(@Requester() user: UserEntity, @Param('id') id: string) {
+    return this.deleteTagUseCase.execute(id, user);
   }
 }
