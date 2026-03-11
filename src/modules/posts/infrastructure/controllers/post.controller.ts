@@ -20,6 +20,7 @@ import { GetPostsUseCase } from '../../application/use-cases/get-posts.use-case'
 import { UpdatePostUseCase } from '../../application/use-cases/update-post.use-case';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AddTagToPostUseCase } from '../../application/use-cases/add-tag-to-post.use-case';
+import { DeleteTagFromPostUseCase } from '../../application/use-cases/delete-tag-from-post.use-case';
 
 
 @ApiTags('Posts')
@@ -32,6 +33,7 @@ export class PostController {
     private readonly getPostsUseCase: GetPostsUseCase,
     private readonly getPostByIdUseCase: GetPostByIdUseCase,
     private readonly addTagToPostUseCase: AddTagToPostUseCase,
+    private readonly deleteTagFromPostUseCase: DeleteTagFromPostUseCase,
   ) {}
 
   @ApiOperation({ summary: 'Get all posts' })
@@ -86,6 +88,20 @@ export class PostController {
     return post!.toJSON();
   }
 
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Remove a tag from a post' })
+  @ApiResponse({ status: 200, description: 'Tag removed successfully' })
+  @UseGuards(JwtAuthGuard)
+  @Delete(':postId/tags/:tagId') // On utilise DELETE pour la suppression
+  public async removeTag(
+    @Requester() user: UserEntity,
+    @Param('postId') postId: string,
+    @Param('tagId') tagId: string,
+  ) {
+    const post = await this.deleteTagFromPostUseCase.execute(postId, tagId, user);
+    return post!.toJSON();
+  }
+
 
   @ApiOperation({ summary: 'Update a post' })
   @Patch(':id')
@@ -95,6 +111,7 @@ export class PostController {
   ) {
     return this.updatePostUseCase.execute(id, input);
   }
+  
 
 
   @ApiOperation({ summary: 'Delete a post' })

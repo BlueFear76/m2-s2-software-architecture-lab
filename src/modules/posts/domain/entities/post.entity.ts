@@ -34,6 +34,10 @@ export class PostEntity {
   public get authorId() {
     return this._authorId;
   }
+  
+  public get tags(): TagEntity[] {
+    return this._tags;
+  }
 
   public addTag(tag: TagEntity): void {
     const isAlreadyPresent = this._tags.some(t => t.id === tag.id);
