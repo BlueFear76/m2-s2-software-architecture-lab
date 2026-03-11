@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { LoggingService } from '../../../shared/logging/domain/services/logging.service';
 import { UserEntity } from '../../../users/domain/entities/user.entity';
 import { PostEntity } from '../../domain/entities/post.entity';
@@ -17,10 +17,13 @@ export class GetPostByIdUseCase {
   ): Promise<PostEntity | undefined> {
     this.loggingService.log('GetPostByIdUseCase.execute');
     const post = await this.postRepository.getPostById(id);
-    if (!post) return;
+
+    if (!post) {
+      throw new NotFoundException(`This post doesn't exist`);
+    }
 
     if (!user.permissions.posts.canReadPost(post)) {
-      throw new Error('Cannot read this post');
+      throw new ForbiddenException('Cannot read this post');
     }
 
     return post;

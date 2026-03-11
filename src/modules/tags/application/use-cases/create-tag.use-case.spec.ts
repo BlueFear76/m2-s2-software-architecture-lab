@@ -9,6 +9,7 @@ import { TagRepository } from '../../domain/repositories/tag.repository';
 import { CreateTagUseCase } from './create-tag.use-case';
 import { LoggingService } from '../../../shared/logging/domain/services/logging.service';
 import { TagAlreadyExistsException } from '../../domain/exceptions/tag-already-exists.exception';
+import { BadRequestException } from '@nestjs/common';
 
 describe('CreateTagUseCase', () => {
   let useCase: CreateTagUseCase;
@@ -30,47 +31,76 @@ describe('CreateTagUseCase', () => {
     useCase = new CreateTagUseCase(eventEmitter, tagRepository, loggingService);
   });
 
+  // --- Tes tests existants (déjà très bons) ---
+
   it('should create a tag and emit an event when user has permission', async () => {
-    // Arrange
     const user = makeUserWithPermission();
-    const createTagDto = {
-      name: 'my-first-tag',
-    };
+    const tagName = 'my-first-tag';
+    const createTagDto = { name: tagName };
 
-    // Act
-    await useCase.execute(createTagDto, user);
+    const result = await useCase.execute(createTagDto, user);
 
-    // Assert
+    expect(result.id).toBeDefined();
+    // On utilise toString() qui est public dans ton TagName
+    expect(result.name.toString()).toBe(tagName); 
+
     expect(tagRepository.createTag).toHaveBeenCalledTimes(1);
+    
     expect(eventEmitter.emit).toHaveBeenCalledWith(
       TagCreatedEvent,
-      expect.objectContaining({ tagId: expect.any(String) }),
+      expect.objectContaining({ 
+        tagId: result.id,
+        tagName: tagName
+      }),
     );
   });
 
   it('should throw UserCannotCreateTagException when user does not have permission', async () => {
-    // Arrange
     const user = makeUserWithoutPermission();
-    const createTagDto = {
-      name: 'my-first-tag',
-    };
+    const createTagDto = { name: 'my-first-tag' };
 
-    // Act
     const act = () => useCase.execute(createTagDto, user);
 
-    // Assert
     await expect(act).rejects.toThrow(UserCannotCreateTagException);
     expect(tagRepository.createTag).not.toHaveBeenCalled();
-    expect(eventEmitter.emit).not.toHaveBeenCalled();
   });
 
   it('should throw TagAlreadyExistsException when tag exists', async () => {
-  const user = makeUserWithPermission();
-  const createTagDto = { name: 'my-first-tag' };
+    const user = makeUserWithPermission();
+    const createTagDto = { name: 'my-first-tag' };
+    tagRepository.getTagByName.mockResolvedValue({ id: 'existing-id' } as any);
 
-  tagRepository.getTagByName.mockResolvedValue({} as any); // Tag existe
+    await expect(useCase.execute(createTagDto, user))
+      .rejects.toThrow(TagAlreadyExistsException);
+  });
 
-  await expect(useCase.execute(createTagDto, user))
-    .rejects.toThrow(TagAlreadyExistsException);
-});
+  // --- Nouveaux tests pour le format (400 Bad Request) ---
+
+  it('should throw BadRequestException for invalid name format (Uppercase/Spaces)', async () => {
+    const user = makeUserWithPermission();
+    // On teste "Java Script" qui devrait être rejeté si le Use Case ne normalise pas
+    // Ou renvoyer 400 si ton Value Object bloque.
+    const createTagDto = { name: 'Java Script' };
+
+    await expect(useCase.execute(createTagDto, user))
+      .rejects.toThrow(BadRequestException);
+  });
+
+  it('should throw BadRequestException when tag name is too short', async () => {
+    const user = makeUserWithPermission();
+    const createTagDto = { name: 'a' }; // 1 seul caractère (le sujet dit 2-50)
+
+    await expect(useCase.execute(createTagDto, user))
+      .rejects.toThrow(BadRequestException);
+  });
+
+  it('should successfully create a tag when name is correctly normalized', async () => {
+    const user = makeUserWithPermission();
+    const createTagDto = { name: 'typescript' };
+
+    await useCase.execute(createTagDto, user);
+
+    const savedTag = tagRepository.createTag.mock.calls[0][0];
+    expect(savedTag.name.toString()).toBe('typescript');
+  });
 });

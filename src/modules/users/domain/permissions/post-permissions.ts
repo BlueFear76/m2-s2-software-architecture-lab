@@ -5,7 +5,7 @@ export class PostPermissions {
   constructor(
     private readonly userId: string,
     private readonly role: UserRole,
-  ) {}
+  ) { }
 
   public canCreate(): boolean {
     return this.role === 'writer';
@@ -16,7 +16,12 @@ export class PostPermissions {
   }
 
   public canReadPost(post: PostEntity): boolean {
-    if (post.authorId === this.userId) return true;
+    // On compare les valeurs brutes (strings)
+    const postAuthorId = typeof post.authorId === 'object' ? (post.authorId as any).value : post.authorId;
+    const currentUserId = typeof this.userId === 'object' ? (this.userId as any).value : this.userId;
+
+    if (postAuthorId === currentUserId) return true;
+
     if (this.role === 'admin' || this.role === 'moderator') return true;
 
     return post.status === 'accepted';

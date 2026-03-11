@@ -17,7 +17,7 @@ export class CreateTagUseCase {
     private readonly loggingService: LoggingService,
   ) { }
 
-  public async execute(input: CreateTagDto, user: UserEntity): Promise<void> {
+  public async execute(input: CreateTagDto, user: UserEntity): Promise<TagEntity> {
     this.loggingService.log('CreateTagUseCase.execute');
 
     if (!user.permissions.tags.isAdmin()) {
@@ -35,6 +35,9 @@ export class CreateTagUseCase {
 
     this.eventEmitter.emit(TagCreatedEvent, {
       tagId: tag.id,
+      tagName: tag.name.toString,
     });
+
+    return tag;
   }
 }

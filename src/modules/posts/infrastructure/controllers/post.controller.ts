@@ -21,6 +21,7 @@ import { UpdatePostUseCase } from '../../application/use-cases/update-post.use-c
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AddTagToPostUseCase } from '../../application/use-cases/add-tag-to-post.use-case';
 import { DeleteTagFromPostUseCase } from '../../application/use-cases/delete-tag-from-post.use-case';
+import { OptionalJwtAuthGuard } from 'src/modules/shared/auth/infrastructure/guards/optional-jwt-auth.guard';
 
 
 @ApiTags('Posts')
@@ -39,8 +40,12 @@ export class PostController {
   @ApiOperation({ summary: 'Get all posts' })
   @ApiResponse({ status: 200, description: 'Return all posts.' })
   @Get()
-  public async getPosts() {
-    const posts = await this.getPostsUseCase.execute();
+  @ApiBearerAuth('access-token') // <--- Indispensable pour Swagger !
+  @UseGuards(OptionalJwtAuthGuard)
+  public async getPosts(
+    @Requester() user: UserEntity,
+  ) {
+    const posts = await this.getPostsUseCase.execute(user);
 
     return posts.map((p) => p.toJSON());
   }
@@ -106,10 +111,11 @@ export class PostController {
   @ApiOperation({ summary: 'Update a post' })
   @Patch(':id')
   public async updatePost(
+    @Requester() user: UserEntity,
     @Param('id') id: string,
     @Body() input: UpdatePostDto,
   ) {
-    return this.updatePostUseCase.execute(id, input);
+    return this.updatePostUseCase.execute(id, input, user);
   }
   
 
