@@ -6,6 +6,8 @@ import { PostCreatedEvent } from '../../domain/events/post-created.event';
 import { UserCannotCreatePostException } from '../../domain/exceptions/user-cannot-create-post.exception';
 import { PostRepository } from '../../domain/repositories/post.repository';
 import { CreatePostDto } from '../dtos/create-post.dto';
+import { PostSlug } from '../../domain/value-objects/post-slug.value-object';
+
 
 @Injectable()
 export class CreatePostUseCase {
@@ -19,13 +21,30 @@ export class CreatePostUseCase {
       throw new UserCannotCreatePostException();
     }
 
-    const post = PostEntity.create(input.title, input.content, input.authorId);
+    const baseSlugValue = input.slug 
+      ? PostSlug.fromTitle(input.slug)
+      : PostSlug.fromTitle(input.title);
+
+    let finalSlug = baseSlugValue;
+    let counter = 2;
+
+    while (await this.postRepository.findBySlug(finalSlug)) {
+      finalSlug = `${baseSlugValue}-${counter}`;
+      counter++;
+    }
+
+    const post = PostEntity.create(
+      input.title, 
+      input.content, 
+      user.id,
+      finalSlug
+    );
 
     await this.postRepository.createPost(post);
 
     this.eventEmitter.emit(PostCreatedEvent, {
       postId: post.id,
-      authorId: input.authorId,
+      authorId: user.id,
     });
   }
 }

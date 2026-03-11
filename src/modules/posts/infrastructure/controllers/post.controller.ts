@@ -22,6 +22,7 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { AddTagToPostUseCase } from '../../application/use-cases/add-tag-to-post.use-case';
 import { DeleteTagFromPostUseCase } from '../../application/use-cases/delete-tag-from-post.use-case';
 import { OptionalJwtAuthGuard } from 'src/modules/shared/auth/infrastructure/guards/optional-jwt-auth.guard';
+import { GetPostBySlugUseCase } from '../../application/use-cases/get-post-by-slug.use-case';
 
 
 @ApiTags('Posts')
@@ -35,7 +36,8 @@ export class PostController {
     private readonly getPostByIdUseCase: GetPostByIdUseCase,
     private readonly addTagToPostUseCase: AddTagToPostUseCase,
     private readonly deleteTagFromPostUseCase: DeleteTagFromPostUseCase,
-  ) {}
+    private readonly getPostBySlugUseCase: GetPostBySlugUseCase,
+  ) { }
 
   @ApiOperation({ summary: 'Get all posts' })
   @ApiResponse({ status: 200, description: 'Return all posts.' })
@@ -74,7 +76,7 @@ export class PostController {
     @Body() input: CreatePostDto,
   ) {
     return this.createPostUseCase.execute(
-      { ...input, authorId: user.id },
+      { ...input },
       user,
     );
   }
@@ -109,6 +111,8 @@ export class PostController {
 
 
   @ApiOperation({ summary: 'Update a post' })
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   public async updatePost(
     @Requester() user: UserEntity,
@@ -117,12 +121,26 @@ export class PostController {
   ) {
     return this.updatePostUseCase.execute(id, input, user);
   }
-  
+
 
 
   @ApiOperation({ summary: 'Delete a post' })
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   public async deletePost(@Param('id') id: string) {
     return this.deletePostUseCase.execute(id);
+  }
+
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Get a post by Slug' })
+  @Get('slug/:slug')
+  @UseGuards(OptionalJwtAuthGuard)
+  public async getPostBySlug(
+    @Requester() user: UserEntity | undefined,
+    @Param('slug') slug: string,
+  ) {
+    const post = await this.getPostBySlugUseCase.execute(slug, user);
+    return post.toJSON();
   }
 }

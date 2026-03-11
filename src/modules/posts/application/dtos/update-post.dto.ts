@@ -12,4 +12,6 @@ export class UpdatePostDto {
     example: 'Contenu mis à jour...' 
   })
   content?: string;
+
+  slug?: string;
 }

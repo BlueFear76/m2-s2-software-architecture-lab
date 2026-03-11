@@ -26,4 +26,7 @@ export class SQLitePostEntity {
     inverseJoinColumn: { name: 'tag_id', referencedColumnName: 'id' },
   })
   tags: SQLiteTagEntity[];
+
+  @Column({ unique: true })
+  slug: string;
 }
