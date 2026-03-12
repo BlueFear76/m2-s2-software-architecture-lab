@@ -8,8 +8,5 @@ export abstract class CommentRepository {
 
   public abstract findByPostId(postId: string, options: any): Promise<CommentEntity[]>;
 
-  public abstract countByPostId(postId: string): Promise<number>;
-
   public abstract delete(id: string): Promise<void>;
-
 }
