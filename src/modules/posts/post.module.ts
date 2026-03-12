@@ -33,5 +33,6 @@ import { GetPostBySlugUseCase } from './application/use-cases/get-post-by-slug.u
     DeleteTagFromPostUseCase,
     GetPostBySlugUseCase
   ],
+  exports: [PostRepository]
 })
 export class PostModule {}
