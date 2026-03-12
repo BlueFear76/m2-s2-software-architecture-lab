@@ -4,12 +4,14 @@ import { FollowUserUseCase } from '../../application/use-cases/follow-user.use-c
 import { Requester } from 'src/modules/shared/auth/infrastructure/decorators/requester.decorator';
 import { UserEntity } from 'src/modules/users/domain/entities/user.entity';
 import { JwtAuthGuard } from 'src/modules/shared/auth/infrastructure/guards/jwt-auth.guard';
+import { UnfollowUserUseCase } from '../../application/use-cases/unfollow-user.use-case';
 
 @ApiTags('Subscriptions')
 @Controller('users')
 export class SubscriptionController {
     constructor(
         private readonly followUserUseCase: FollowUserUseCase,
+        private readonly unfollowUserUseCase: UnfollowUserUseCase,
     ) { }
 
     @Post(':id/follow')
@@ -25,5 +27,16 @@ export class SubscriptionController {
     ) {
         await this.followUserUseCase.execute(user.id, targetUserId);
         return { message: 'Successfully followed' };
+    }
+
+    @Delete(':id/unfollow')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth('access-token')
+    @HttpCode(204) // Pas de contenu au retour d'un Delete réussi
+    public async unfollow(
+        @Param('id') targetUserId: string,
+        @Requester() user: UserEntity,
+    ) {
+        await this.unfollowUserUseCase.execute(user.id, targetUserId);
     }
 }
