@@ -9,6 +9,7 @@ import { SQLiteCommentRepository } from './infrastructure/repositories/comment.s
 
 // Use Cases
 import { CreateCommentUseCase } from './application/use-cases/create-comment.use-case';
+import { UpdateCommentUseCase } from './application/use-cases/update-comment.use-case';
 
 @Module({
   imports: [
@@ -22,8 +23,9 @@ import { CreateCommentUseCase } from './application/use-cases/create-comment.use
       provide: CommentRepository,
       useClass: SQLiteCommentRepository,
     },
-    
-    CreateCommentUseCase
+
+    CreateCommentUseCase,
+    UpdateCommentUseCase
   ],
   exports: [CommentRepository],
 })
