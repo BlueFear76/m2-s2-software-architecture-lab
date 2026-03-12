@@ -23,7 +23,7 @@ export class CommentEntity {
     readonly postId: string,
     readonly createdAt: Date,
     private _updatedAt: Date,
-  ) {}
+  ) { }
 
   public static create(content: string, authorId: string, postId: string): CommentEntity {
     return new CommentEntity(
@@ -33,6 +33,17 @@ export class CommentEntity {
       postId,
       new Date(),
       new Date(),
+    );
+  }
+
+  public static reconstitute(data: any): CommentEntity {
+    return new CommentEntity(
+      data.id,
+      new CommentContent(data.content),
+      data.authorId,
+      data.postId,
+      data.createdAt,
+      data.updatedAt,
     );
   }
 
