@@ -33,4 +33,4 @@ import { GetCommentsByPostUseCase } from './application/use-cases/get-comments-b
   ],
   exports: [CommentRepository],
 })
-export class CommentsModule {}
+export class CommentModule {}
