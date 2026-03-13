@@ -3,14 +3,15 @@ import { PostRepository } from '../../../posts/domain/repositories/post.reposito
 import { CommentRepository } from '../../domain/repositories/comment.repository';
 import { CommentEntity } from '../../domain/entities/comment.entity';
 import { UserEntity } from '../../../users/domain/entities/user.entity';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class CreateCommentUseCase {
   constructor(
     private readonly commentRepository: CommentRepository,
     private readonly postRepository: PostRepository,
-    // private readonly notificationService: NotificationService
-  ) {}
+    private readonly eventEmitter: EventEmitter2,
+  ) { }
 
   public async execute(
     postId: string,
@@ -32,8 +33,13 @@ export class CreateCommentUseCase {
 
     await this.commentRepository.save(comment);
 
-    //TODO: Notification ("User X commented on your post 'Title'")
-    // this.notificationService.notifyComment(post.authorId, user.username, post.title);
+    this.eventEmitter.emit('comment.created', {
+      postId: post.id,
+      authorId: post.authorId,
+      commenterName: user.username,
+      postTitle: post.title.toString(),
+      link : post.slug,
+    });
 
     return comment;
   }

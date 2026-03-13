@@ -95,5 +95,28 @@ export class PostStatusChangedHandler {
 
         await this.notificationRepository.save(deletionNotif);
     }
+
+    @OnEvent('comment.created')
+    public async handleCommentCreated(payload: {
+        postId: string;
+        authorId: string;
+        commenterName: string;
+        postTitle: string;
+        link : string;
+    }) {
+        this.loggingService.log(`New comment notification for ${payload.authorId}`);
+
+        const commentNotif = NotificationEntity.create({
+            id: uuidv4(),
+            recipientId: payload.authorId,
+            type: NotificationType.NEW_COMMENT,
+            title: 'New Comment',
+            message: `${payload.commenterName} commented on your post "${payload.postTitle}"`,
+            link: payload.link,
+            metadata: { postId: payload.postId }
+        });
+
+        await this.notificationRepository.save(commentNotif);
+    }
 }
 

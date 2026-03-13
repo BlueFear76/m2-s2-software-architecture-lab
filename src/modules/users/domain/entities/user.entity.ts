@@ -53,6 +53,10 @@ export class UserEntity {
     return this._role;
   }
 
+  public get username(): UserUsername {
+    return this._username;
+  }
+
   public static reconstitute(input: Record<string, unknown>): UserEntity {
     return new UserEntity(
       input.id as string,
