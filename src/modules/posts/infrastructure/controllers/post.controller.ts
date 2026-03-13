@@ -131,8 +131,8 @@ export class PostController {
   @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  public async deletePost(@Param('id') id: string) {
-    return this.deletePostUseCase.execute(id);
+  public async deletePost(@Param('id') id: string , @Requester() user: UserEntity) {
+    return this.deletePostUseCase.execute(id , user);
   }
 
   @ApiBearerAuth('access-token')

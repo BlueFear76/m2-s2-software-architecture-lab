@@ -15,6 +15,10 @@ export class PostPermissions {
     return post.status === 'draft' && post.authorId === this.userId;
   }
 
+  public canDeletePost(post: PostEntity): boolean {
+    return post.authorId === this.userId || this.canModerate();
+  }
+
   public canReadPost(post: PostEntity): boolean {
     // On compare les valeurs brutes (strings)
     const postAuthorId = typeof post.authorId === 'object' ? (post.authorId as any).value : post.authorId;
