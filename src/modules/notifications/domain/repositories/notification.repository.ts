@@ -9,7 +9,7 @@ export abstract class NotificationRepository {
         recipientId: string, 
         page: number, 
         pageSize: number,
-        isRead?: boolean // Filtre optionnel
+        isRead?: boolean
     ): Promise<{ notifications: NotificationEntity[]; total: number; unreadCount: number }>;
 
     public abstract markAllAsRead(recipientId: string): Promise<number>;
