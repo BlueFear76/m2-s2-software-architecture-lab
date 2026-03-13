@@ -67,8 +67,27 @@ export class TagController {
   }
 
   @ApiBearerAuth('access-token')
-  @ApiOperation({ summary: 'Create a new tag' })
-  @ApiResponse({ status: 201, description: 'Tag created' })
+@ApiOperation({ summary: 'Create a new tag' })
+@ApiResponse({ 
+  status: 201, 
+  description: 'Tag created successfully' 
+})
+@ApiResponse({ 
+  status: 400, 
+  description: 'Invalid name format (must be lowercase, alphanumeric, 2-50 chars, hyphens allowed)' 
+})
+@ApiResponse({ 
+  status: 401, 
+  description: 'Not authenticated (missing or invalid JWT token)' 
+})
+@ApiResponse({ 
+  status: 403, 
+  description: 'Not an admin (insufficient permissions)' 
+})
+@ApiResponse({ 
+  status: 409, 
+  description: 'Tag name already exists (case-insensitive)' 
+})
   @UseGuards(JwtAuthGuard)
   @Post()
   public async createTag(
