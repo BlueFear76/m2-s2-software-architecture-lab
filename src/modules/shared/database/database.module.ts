@@ -6,6 +6,7 @@ import { SQLiteUserEntity } from '../../users/infrastructure/entities/user.sqlit
 import { SQLiteTagEntity } from 'src/modules/tags/infrastructure/entities/tag.sqlite.entity';
 import { SQLiteCommentEntity } from 'src/modules/comments/infrastructure/entities/comment.sqlite.entity';
 import { SQLiteSubscriptionEntity } from 'src/modules/subscriptions/infrastructure/entities/subscription.sqlite.entity';
+import { SQLiteNotificationEntity } from 'src/modules/notifications/infrastructure/entities/notification.sqlite.entity';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { SQLiteSubscriptionEntity } from 'src/modules/subscriptions/infrastructu
       useFactory: (configService: ConfigService) => ({
         type: 'sqlite',
         database: configService.get<string>('DATABASE_URL'),
-        entities: [SQLitePostEntity, SQLiteUserEntity, SQLiteTagEntity, SQLiteCommentEntity, SQLiteSubscriptionEntity],
+        entities: [SQLitePostEntity, SQLiteUserEntity, SQLiteTagEntity, SQLiteCommentEntity, SQLiteSubscriptionEntity, SQLiteNotificationEntity],
         synchronize: true,
       }),
     }),
