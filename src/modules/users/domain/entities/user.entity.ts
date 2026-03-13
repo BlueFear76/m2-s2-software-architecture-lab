@@ -1,4 +1,4 @@
-import { v4 } from 'uuid';
+import { v4  } from 'uuid';
 import { Permissions } from '../permissions/permissions';
 import { UserUsername } from '../value-objects/user-username.value-object';
 

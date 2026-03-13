@@ -17,6 +17,7 @@ export class CreatePostUseCase {
   ) { }
 
   public async execute(input: CreatePostDto, user: UserEntity): Promise<void> {
+    
     if (!user.permissions.posts.canCreate()) {
       throw new UserCannotCreatePostException();
     }

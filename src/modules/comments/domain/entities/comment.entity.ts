@@ -1,4 +1,4 @@
-import { v4 } from 'uuid';
+import { v4  } from 'uuid';
 
 export class CommentContent {
   constructor(private readonly value: string) {
