@@ -14,14 +14,14 @@ export class CreatePostUseCase {
   constructor(
     private readonly eventEmitter: EventEmitter2,
     private readonly postRepository: PostRepository,
-  ) {}
+  ) { }
 
   public async execute(input: CreatePostDto, user: UserEntity): Promise<void> {
     if (!user.permissions.posts.canCreate()) {
       throw new UserCannotCreatePostException();
     }
 
-    const baseSlugValue = input.slug 
+    const baseSlugValue = input.slug
       ? PostSlug.fromTitle(input.slug)
       : PostSlug.fromTitle(input.title);
 
@@ -34,17 +34,18 @@ export class CreatePostUseCase {
     }
 
     const post = PostEntity.create(
-      input.title, 
-      input.content, 
+      input.title,
+      input.content,
       user.id,
       finalSlug
     );
 
     await this.postRepository.createPost(post);
 
-    this.eventEmitter.emit(PostCreatedEvent, {
+    this.eventEmitter.emit('post.pending_review', {
       postId: post.id,
-      authorId: user.id,
+      title: post.title.toString(),
+      link: post.slug
     });
   }
 }

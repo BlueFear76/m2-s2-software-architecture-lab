@@ -5,6 +5,7 @@ import { NotificationRepository } from '../../domain/repositories/notification.r
 import { NotificationEntity, NotificationType } from '../../domain/entities/notification.entity';
 import { SubscriptionRepository } from 'src/modules/subscriptions/domain/repositories/subscription.repository';
 import { LoggingService } from 'src/modules/shared/logging/domain/services/logging.service';
+import { UserRepository } from 'src/modules/users/domain/repositories/user.repository';
 
 @Injectable()
 export class PostStatusChangedHandler {
@@ -12,6 +13,7 @@ export class PostStatusChangedHandler {
         private readonly notificationRepository: NotificationRepository,
         private readonly subscriptionRepository: SubscriptionRepository,
         private readonly loggingService: LoggingService,
+        private readonly userRepository: UserRepository,
     ) { }
 
     @OnEvent('post.status.changed')
@@ -21,6 +23,7 @@ export class PostStatusChangedHandler {
         title: string;
         status: string;
         link: string;
+        authorName : string;
     }) {
         this.loggingService.log("PostStatusChangedHandler.called");
         if (payload.status === "accepted") {
@@ -48,7 +51,7 @@ export class PostStatusChangedHandler {
                     recipientId: followerId,
                     type: NotificationType.NEW_POST_FROM_FOLLOWED,
                     title: 'New Post',
-                    message: `An author you follow has published : ${payload.title}`,
+                    message: `${payload.authorName} published a new post: "${payload.title}"`,
                     link: payload.link
                     ,
                     metadata: { postId: payload.postId, authorId: payload.authorId }
@@ -118,5 +121,40 @@ export class PostStatusChangedHandler {
 
         await this.notificationRepository.save(commentNotif);
     }
+
+    @OnEvent('post.pending_review')
+public async handlePostPendingReview(payload: {
+    postId: string;
+    title: string;
+    link: string;
+}) {
+    this.loggingService.log(`Notifying moderators for new post: ${payload.title}`);
+    
+    const allUsers = await this.userRepository.listUsers();
+
+    const moderators = allUsers.filter(user => 
+        user.permissions.posts.canModerate() // On utilise ta méthode de permission
+    );
+
+    if (moderators.length === 0) {
+        this.loggingService.log("No moderators found to notify.");
+        return;
+    }
+
+    const notificationsToSave = moderators.map(mod => {
+        const notif = NotificationEntity.create({
+            id: uuidv4(),
+            recipientId: mod.id,
+            type: NotificationType.POST_PENDING_REVIEW,
+            title: 'Action Required',
+            message: `New post pending review: "${payload.title}"`,
+            link: payload.link,
+            metadata: { postId: payload.postId }
+        });
+        return this.notificationRepository.save(notif);
+    });
+
+    await Promise.all(notificationsToSave);
+}
 }
 

@@ -15,9 +15,10 @@ import { TagModule } from '../tags/tag.module';
 import { DeleteTagFromPostUseCase } from './application/use-cases/delete-tag-from-post.use-case';
 import { GetPostBySlugUseCase } from './application/use-cases/get-post-by-slug.use-case';
 import { UpdatePostStatusUseCase } from './application/use-cases/update-post-status.use-case';
+import { UserModule } from '../users/user.module';
 
 @Module({
-  imports: [AuthModule, LoggingModule, TagModule],
+  imports: [AuthModule, LoggingModule, TagModule, UserModule],
   controllers: [PostController],
   providers: [
     {

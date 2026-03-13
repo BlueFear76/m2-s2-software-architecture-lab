@@ -4,13 +4,15 @@ import { PostRepository } from '../../domain/repositories/post.repository';
 import { UserEntity } from 'src/modules/users/domain/entities/user.entity';
 import { PostStatus } from '../../domain/entities/post.entity';
 import { LoggingService } from 'src/modules/shared/logging/domain/services/logging.service';
+import { UserRepository } from 'src/modules/users/domain/repositories/user.repository';
 
 @Injectable()
 export class UpdatePostStatusUseCase {
     constructor(
         private readonly postRepository: PostRepository,
-        private readonly eventEmitter: EventEmitter2, // Indispensable pour les notifs
+        private readonly eventEmitter: EventEmitter2,
         private readonly loggingService: LoggingService,
+        private readonly userRepository: UserRepository,
 
     ) { }
 
@@ -26,6 +28,9 @@ export class UpdatePostStatusUseCase {
             throw new ForbiddenException("You are not allowed to moderate this post");
         }
 
+        const author = await this.userRepository.getUserById(post.authorId);
+        const authorName = author ? author.username : 'An author';
+
         post.updateStatus(newStatus)
 
         await this.postRepository.updatePost(id, post);
@@ -36,7 +41,8 @@ export class UpdatePostStatusUseCase {
             authorId: post.authorId,
             title: post.title.toString(),
             status: post.status,
-            link : post.slug
+            link : post.slug,
+            authorName : authorName
         });
     }
 }
