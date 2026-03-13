@@ -29,19 +29,43 @@ export class SQLiteSubscriptionRepository implements SubscriptionRepository {
       .delete({ followerId, followingId });
   }
 
-  public async getFollowers(userId: string): Promise<SubscriptionEntity[]> {
-    const relations = await this.dataSource
+  public async getFollowers(
+    userId: string,
+    page: number,
+    pageSize: number
+  ): Promise<{ followers: SubscriptionEntity[]; total: number }> {
+    const [relations, total] = await this.dataSource
       .getRepository(SQLiteSubscriptionEntity)
-      .find({ where: { followingId: userId } });
+      .findAndCount({
+        where: { followingId: userId },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        order: { createdAt: 'DESC' },
+      });
 
-    return relations.map((rel) => SubscriptionEntity.reconstitute(rel));
+    return {
+      followers: relations.map((rel) => SubscriptionEntity.reconstitute(rel)),
+      total,
+    };
   }
 
-  public async getFollowing(userId: string): Promise<SubscriptionEntity[]> {
-    const relations = await this.dataSource
+  public async getFollowing(
+    userId: string,
+    page: number,
+    pageSize: number
+  ): Promise<{ following: SubscriptionEntity[]; total: number }> {
+    const [relations, total] = await this.dataSource
       .getRepository(SQLiteSubscriptionEntity)
-      .find({ where: { followerId: userId } });
+      .findAndCount({
+        where: { followerId: userId },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        order: { createdAt: 'DESC' },
+      });
 
-    return relations.map((rel) => SubscriptionEntity.reconstitute(rel));
+    return {
+      following: relations.map((rel) => SubscriptionEntity.reconstitute(rel)),
+      total,
+    };
   }
 }
