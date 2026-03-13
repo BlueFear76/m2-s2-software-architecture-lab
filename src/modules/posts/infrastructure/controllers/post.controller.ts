@@ -18,11 +18,13 @@ import { DeletePostUseCase } from '../../application/use-cases/delete-post.use-c
 import { GetPostByIdUseCase } from '../../application/use-cases/get-post-by-id.use-case';
 import { GetPostsUseCase } from '../../application/use-cases/get-posts.use-case';
 import { UpdatePostUseCase } from '../../application/use-cases/update-post.use-case';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AddTagToPostUseCase } from '../../application/use-cases/add-tag-to-post.use-case';
 import { DeleteTagFromPostUseCase } from '../../application/use-cases/delete-tag-from-post.use-case';
 import { OptionalJwtAuthGuard } from 'src/modules/shared/auth/infrastructure/guards/optional-jwt-auth.guard';
 import { GetPostBySlugUseCase } from '../../application/use-cases/get-post-by-slug.use-case';
+import { UpdatePostStatusUseCase } from '../../application/use-cases/update-post-status.use-case';
+import type { PostStatus } from '../../domain/entities/post.entity';
 
 
 @ApiTags('Posts')
@@ -37,6 +39,7 @@ export class PostController {
     private readonly addTagToPostUseCase: AddTagToPostUseCase,
     private readonly deleteTagFromPostUseCase: DeleteTagFromPostUseCase,
     private readonly getPostBySlugUseCase: GetPostBySlugUseCase,
+    private readonly updatePostStatusUseCase: UpdatePostStatusUseCase
   ) { }
 
   @ApiOperation({ summary: 'Get all posts' })
@@ -142,5 +145,33 @@ export class PostController {
   ) {
     const post = await this.getPostBySlugUseCase.execute(slug, user);
     return post.toJSON();
+  }
+
+  @Patch(':id/status')
+  @ApiBearerAuth('access-token')
+  @UseGuards(OptionalJwtAuthGuard)
+  @ApiOperation({ summary: 'Changer le statut d\'un post (Modération)' })
+  @ApiParam({ name: 'id', description: 'ID du post à modérer' })
+  @ApiBody({ 
+    schema: {
+      type: 'object',
+      properties: {
+        status: { 
+          type: 'string', 
+          enum: ['ACCEPTED', 'REJECTED'],
+          example: 'ACCEPTED' 
+        }
+      }
+    }
+  })
+  @ApiResponse({ status: 200, description: 'Le statut a été mis à jour et les notifications envoyées.' })
+  @ApiResponse({ status: 403, description: 'Permission refusée (non modérateur).' })
+  @ApiResponse({ status: 404, description: 'Post introuvable.' })
+  public async updateStatus(
+    @Param('id') id: string,
+    @Body('status') status: PostStatus,
+    @Requester() user: UserEntity,
+  ) {
+    return await this.updatePostStatusUseCase.execute(id, status, user);
   }
 }

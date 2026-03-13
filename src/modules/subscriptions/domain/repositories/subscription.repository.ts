@@ -19,4 +19,6 @@ export abstract class SubscriptionRepository {
         page: number, 
         pageSize: number
     ): Promise<{ following: SubscriptionEntity[]; total: number }>;
+
+    public abstract findAllFollowerIds(followedId: string): Promise<string[]>;
 }

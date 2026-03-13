@@ -14,6 +14,7 @@ import { AddTagToPostUseCase } from './application/use-cases/add-tag-to-post.use
 import { TagModule } from '../tags/tag.module';
 import { DeleteTagFromPostUseCase } from './application/use-cases/delete-tag-from-post.use-case';
 import { GetPostBySlugUseCase } from './application/use-cases/get-post-by-slug.use-case';
+import { UpdatePostStatusUseCase } from './application/use-cases/update-post-status.use-case';
 
 @Module({
   imports: [AuthModule, LoggingModule, TagModule],
@@ -31,7 +32,8 @@ import { GetPostBySlugUseCase } from './application/use-cases/get-post-by-slug.u
     GetPostByIdUseCase,
     AddTagToPostUseCase,
     DeleteTagFromPostUseCase,
-    GetPostBySlugUseCase
+    GetPostBySlugUseCase,
+    UpdatePostStatusUseCase
   ],
   exports: [PostRepository]
 })

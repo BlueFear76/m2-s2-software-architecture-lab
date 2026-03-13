@@ -39,6 +39,10 @@ export class PostEntity {
     return this._authorId;
   }
 
+  public get title() {
+    return this._title;
+  }
+
   public get tags(): TagEntity[] {
     return this._tags;
   }
@@ -60,6 +64,10 @@ export class PostEntity {
 
   public removeTag(tagId: string): void {
     this._tags = this._tags.filter(t => t.id !== tagId);
+  }
+
+  public updateStatus(newStatus: PostStatus): void {
+    this._status = newStatus;
   }
 
   public static reconstitute(input: Record<string, unknown>) {

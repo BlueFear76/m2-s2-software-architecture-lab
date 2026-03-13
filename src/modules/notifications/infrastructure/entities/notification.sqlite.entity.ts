@@ -8,8 +8,7 @@ export class SQLiteNotificationEntity {
 
   @Column()
   recipientId: string;
-
-  // On stocke l'enum sous forme de string en base
+  
   @Column({
     type: 'varchar',
   })
@@ -30,10 +29,6 @@ export class SQLiteNotificationEntity {
   @CreateDateColumn()
   createdAt: Date;
 
-  /**
-   * simple-json permet de stocker des objets/tableaux 
-   * dans une colonne texte SQLite de manière transparente.
-   */
   @Column('simple-json', { nullable: true })
   metadata: Record<string, any>;
 }

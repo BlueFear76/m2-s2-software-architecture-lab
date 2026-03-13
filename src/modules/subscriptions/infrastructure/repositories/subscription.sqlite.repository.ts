@@ -68,4 +68,16 @@ export class SQLiteSubscriptionRepository implements SubscriptionRepository {
       total,
     };
   }
+
+  public async findAllFollowerIds(followingId: string): Promise<string[]> {
+    const repo = this.dataSource.getRepository(SQLiteSubscriptionEntity);
+  
+    
+    const results = await repo.find({
+        where: { followingId },
+        select: ['followerId']
+    });
+
+    return results.map(s => s.followerId);
+}
 }

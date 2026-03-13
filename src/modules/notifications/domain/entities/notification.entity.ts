@@ -93,6 +93,7 @@ export class NotificationEntity {
   public toJSON(): Record<string, any> {
     return {
       id: this._id,
+      recipientId: this._recipientId,
       type: this._type,
       title: this._title,
       message: this._message,
